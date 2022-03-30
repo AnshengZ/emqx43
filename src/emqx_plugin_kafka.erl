@@ -215,7 +215,7 @@ unload() ->
 brod_load(_Env) ->
     {ok, _} = application:ensure_all_started(gproc),
     {ok, _} = application:ensure_all_started(brod),
-    {ok, Kafka} = application:get_env(?MODULE, bridges),
+    {ok, Kafka} = application:get_env(?MODULE, emqx_plugin_kafka),
     Endpoints = proplists:get_value(bootstrap_endpoints, Kafka),
     Fun = fun(S) ->
         case string:tokens(S, ":") of
