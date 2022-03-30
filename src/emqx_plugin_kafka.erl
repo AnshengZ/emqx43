@@ -158,8 +158,6 @@ on_message_publish(Message, Env) ->
         {qos, QoS},
         {topic, Topic},
         {from, From},
-%    {flags, Flags},}
-%    {headers, Headers},
         {payload, bin2hexstr_a_f(Payload)},
         {timestamp, Timestamp}
     ],
@@ -169,8 +167,7 @@ on_message_publish(Message, Env) ->
       {count,0},
       {data,Content}
     ],
-   {ok, BrokerValues} = application:get_env(emqx_plugin_kafka, broker),
-    KafkaTopic = proplists:get_value(payloadtopic, BrokerValues),
+    KafkaTopic = getTopic(From),
     produce_kafka_message(list_to_binary(KafkaTopic), Msg, From, Env),
     {ok, Message}.
 
@@ -241,6 +238,18 @@ getPartition(Key) ->
     PartitionNum = proplists:get_value(partitionworkers, BrokerValues),
     <<Fix:120, Match:8>> = crypto:hash(md5, Key),
     abs(Match) rem PartitionNum.
+
+getTopic(ClientId) ->
+    Key = iolist_to_binary(ClientId),
+    {ok, BrokerValues} = application:get_env(emqx_plugin_kafka, broker),
+    payloadtopic = proplists:get_value(payloadtopic, BrokerValues),
+    topicArray = string:tokens(payloadtopic, ",")
+    lens=array:size(topicArray)
+    <<Fix:120, Match:8>> = crypto:hash(md5, Key),
+    index = abs(Match) rem lens,
+    array:get(index,topicArray).
+
+
 
 bin2hexstr_A_F(B) when is_binary(B) ->
     << <<(int2hexchar(H, upper)), (int2hexchar(L, upper))>> || <<H:4, L:4>> <= B>>.
