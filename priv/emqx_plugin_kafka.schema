@@ -24,7 +24,8 @@
   {default, "Processing"},
   {datatype, string}
 ]}.
-{mapping, "kafka.isAsync", "emqx_plugin_kafka.broker", [
+
+{mapping, "kafka.isAsyncProducer", "emqx_plugin_kafka.broker", [
   {default, true},
   {datatype, {enum, [true, false]}}
 ]}.
