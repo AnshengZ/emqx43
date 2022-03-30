@@ -24,6 +24,11 @@
   {default, "Processing"},
   {datatype, string}
 ]}.
+{mapping, "kafka.isAsync", "emqx_plugin_kafka.broker", [
+  {default, true},
+  {datatype, {enum, [true, false]}}
+]}.
+
 
 {translation, "emqx_plugin_kafka.broker", fun(Conf) ->
   KafkaHost = cuttlefish:conf_get("kafka.host", Conf),
@@ -31,5 +36,6 @@
   KafkaPartitionStrategy = cuttlefish:conf_get("kafka.partitionstrategy", Conf),
   KafkaPartitionWorkers = cuttlefish:conf_get("kafka.partitionworkers", Conf),
   KafkaPayloadTopic = cuttlefish:conf_get("kafka.payloadtopic", Conf),
-  [{host, KafkaHost}, {port, KafkaPort}, {partitionstrategy, KafkaPartitionStrategy}, {partitionworkers, KafkaPartitionWorkers}, {payloadtopic, KafkaPayloadTopic}]
+  IsAsyncProducer = cuttlefish:conf_get("kafka.isAsyncProducer", Conf),
+  [{host, KafkaHost}, {port, KafkaPort}, {partitionstrategy, KafkaPartitionStrategy}, {partitionworkers, KafkaPartitionWorkers}, {payloadtopic, KafkaPayloadTopic}, {isAsync, IsAsyncProducer}]
   end}.

@@ -169,9 +169,9 @@ on_message_publish(Message, Env) ->
       {count,0},
       {data,Content}
     ],
-    Kafka = proplists:get_value(bridges, Env),
-    OnMessagePublishTopic = proplists:get_value(on_message_publish_topic, Kafka),
-    produce_kafka_message(list_to_binary(OnMessagePublishTopic), Msg, From, Env),
+   {ok, BrokerValues} = application:get_env(emqx_plugin_kafka, broker),
+    KafkaTopic = proplists:get_value(payloadtopic, BrokerValues),
+    produce_kafka_message(list_to_binary(KafkaTopic), Msg, From, Env),
     {ok, Message}.
 
 on_message_dropped(#message{topic = <<"$SYS/", _/binary>>}, _By, _Reason, _Env) ->
@@ -215,8 +215,8 @@ unload() ->
 brod_load(_Env) ->
     {ok, _} = application:ensure_all_started(gproc),
     {ok, _} = application:ensure_all_started(brod),
-    {ok, Kafka} = application:get_env(?MODULE, emqx_plugin_kafka),
-    Endpoints = proplists:get_value(bootstrap_endpoints, Kafka),
+    {ok, BrokerValues} = application:get_env(emqx_plugin_kafka, broker),
+    Endpoints = proplists:get_value(host, BrokerValues),
     Fun = fun(S) ->
         case string:tokens(S, ":") of
             [Domain] -> {Domain, 9092};
@@ -237,8 +237,8 @@ brod_unload() ->
     ok.
 
 getPartition(Key) ->
-    {ok, Kafka} = application:get_env(?MODULE, bridges),
-    PartitionNum = proplists:get_value(producer_partition, Kafka),
+    {ok, BrokerValues} = application:get_env(emqx_plugin_kafka, broker),
+    PartitionNum = proplists:get_value(partitionworkers, BrokerValues),
     <<Fix:120, Match:8>> = crypto:hash(md5, Key),
     abs(Match) rem PartitionNum.
 
@@ -256,8 +256,8 @@ produce_kafka_message(Topic, Message, ClientId, Env) ->
     Key = iolist_to_binary(ClientId),
     Partition = getPartition(Key),
     JsonStr = jsx:encode(Message),
-    Kafka = proplists:get_value(bridges, Env),
-    IsAsyncProducer = proplists:get_value(is_async_producer, Kafka),
+    {ok, BrokerValues} = application:get_env(emqx_plugin_kafka, broker),
+    IsAsyncProducer = proplists:get_value(isAsync, BrokerValues),
     if
         IsAsyncProducer == false ->
             brod:produce_sync(brod_client_1, Topic, Partition, ClientId, JsonStr);
