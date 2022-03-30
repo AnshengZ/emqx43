@@ -167,7 +167,8 @@ on_message_publish(Message, Env) ->
       {count,0},
       {data,Content}
     ],
-    KafkaTopic = getTopic(From),
+    {ok, BrokerValues} = application:get_env(emqx_plugin_kafka, broker),
+    KafkaTopic = proplists:get_value(payloadtopic, BrokerValues),
     produce_kafka_message(list_to_binary(KafkaTopic), Msg, From, Env),
     {ok, Message}.
 
