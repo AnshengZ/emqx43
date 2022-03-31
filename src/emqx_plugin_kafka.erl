@@ -246,10 +246,9 @@ getTopic(ClientId) ->
     {ok, BrokerValues} = application:get_env(emqx_plugin_kafka, broker),
     payloadtopic = proplists:get_value(payloadtopic, BrokerValues),
     topics = jsx:decode(payloadtopic),
-    io:format("topics:~s",[topics]),
-    <<Fix:120, Match:8>> = crypto:hash(md5, Key),
-    index = abs(Match) rem lens,
-    io:format("index:~s",[list_length(topics)]).
+    io:format("topics:~s",[topics]).
+%    <<Fix:120, Match:8>> = crypto:hash(md5, Key),
+%    index = abs(Match) rem lens.
 
 
 
