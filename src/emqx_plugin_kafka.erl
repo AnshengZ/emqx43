@@ -245,7 +245,7 @@ getTopic(ClientId) ->
     Key = iolist_to_binary(ClientId),
     {ok, BrokerValues} = application:get_env(emqx_plugin_kafka, broker),
     KafkaTopic = proplists:get_value(payloadtopic, BrokerValues),
-    topics = jsx:decode(KafkaTopic),
+    topics = jsx:decode(iolist_to_binary(KafkaTopic)),
     io:format("topics:~s",[topics]).
 %    <<Fix:120, Match:8>> = crypto:hash(md5, Key),
 %    index = abs(Match) rem lens.
