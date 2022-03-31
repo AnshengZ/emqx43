@@ -168,6 +168,7 @@ on_message_publish(Message, Env) ->
       {data,Content}
     ],
     {ok, BrokerValues} = application:get_env(emqx_plugin_kafka, broker),
+    getTopic(From),
     KafkaTopic = proplists:get_value(payloadtopic, BrokerValues),
     produce_kafka_message(list_to_binary(KafkaTopic), Msg, From, Env),
     {ok, Message}.
@@ -244,11 +245,11 @@ getTopic(ClientId) ->
     Key = iolist_to_binary(ClientId),
     {ok, BrokerValues} = application:get_env(emqx_plugin_kafka, broker),
     payloadtopic = proplists:get_value(payloadtopic, BrokerValues),
-    topicArray = string:tokens(payloadtopic, ","),
-    lens=array:size(topicArray),
+    topics = jsx:decode(payloadtopic),
+    io:format("topics:~s",[topics]),
     <<Fix:120, Match:8>> = crypto:hash(md5, Key),
     index = abs(Match) rem lens,
-    array:get(index,topicArray).
+    io:format("index:~s",[list_length(topics)]).
 
 
 
